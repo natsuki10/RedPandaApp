@@ -2,68 +2,65 @@ package com.example.redpandaapp.service;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.CellValue;
+import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import com.example.redpandaapp.model.RedPanda;
 
-/*
- * レッサーパンダ個体一覧読み込みサービスクラス
- */
-
 @Service
 public class ExcelImportService {
 
-	//例外時に読み込むバックアップファイル
-    private static final String BACKUP_FILE = "redpandas_backup.xlsx"; 
+    public List<RedPanda> loadRedPandas(String urlStr) {
+        List<RedPanda> pandaList = new ArrayList<>();
 
-    // URLから読み込み
-    public List<RedPanda> loadRedPandas(String url) {
-        try (InputStream is = new URL(url).openStream()) {
-            return readExcel(is);
+        try (InputStream is = new URL(urlStr).openStream()) {
+            pandaList = parseExcel(is);
         } catch (Exception e) {
-            System.err.println("URLからの読み込みに失敗しました。: " + e.getMessage());
-            return loadFromBackup();
+            // ネットワーク失敗時は resources 配下のバックアップExcelを読み込む
+            try (InputStream fallback = getClass().getResourceAsStream("/redpandas_backup.xlsx")) {
+                pandaList = parseExcel(fallback);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
+
+        return pandaList;
     }
 
-    // ローカルのバックアップExcelを読む
-    private List<RedPanda> loadFromBackup() {
-        try (InputStream is = new ClassPathResource(BACKUP_FILE).getInputStream()) {
-            return readExcel(is);
-        } catch (Exception e) {
-            System.err.println("ローカルファイルの読み込みにも失敗しました: " + e.getMessage());
-            return new ArrayList<>();
-        }
-    }
-
-    // 共通処理。Excelの内容を RedPanda のリストに変換
-    private List<RedPanda> readExcel(InputStream inputStream) throws Exception {
+    private List<RedPanda> parseExcel(InputStream inputStream) throws Exception {
         List<RedPanda> list = new ArrayList<>();
         Workbook workbook = new XSSFWorkbook(inputStream);
         Sheet sheet = workbook.getSheetAt(0);
 
-        for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+        for (int i = 2; i <= sheet.getLastRowNum()-1; i++) {
             Row row = sheet.getRow(i);
             if (row == null) continue;
 
             RedPanda panda = new RedPanda();
+
             panda.setName(getCellValue(row.getCell(0)));
             panda.setGender(getCellValue(row.getCell(1)));
-            panda.setBirthDate(getCellValue(row.getCell(2)));
-            panda.setDeathDate(getCellValue(row.getCell(3)));
-            panda.setAge(getCellValue(row.getCell(4)));
-            panda.setMovedOutDate(getCellValue(row.getCell(5)));
+            panda.setBirthDate(formatDateCell(row.getCell(2)));
+            panda.setDeathDate(formatDateCell(row.getCell(3)));
+            panda.setAge(calculateAge(panda.getBirthDate(), panda.getDeathDate()));
+            panda.setMovedOutDate(formatDateCell(row.getCell(5)));
             panda.setMovedOutZoo(getCellValue(row.getCell(6)));
-            panda.setArrivalDate(getCellValue(row.getCell(7)));
+            panda.setArrivalDate(formatDateCell(row.getCell(7)));
             panda.setOriginZoo(getCellValue(row.getCell(8)));
             panda.setFather(getCellValue(row.getCell(9)));
             panda.setMother(getCellValue(row.getCell(10)));
@@ -82,10 +79,63 @@ public class ExcelImportService {
 
     private String getCellValue(Cell cell) {
         if (cell == null) return "";
+
         return switch (cell.getCellType()) {
-            case NUMERIC -> String.valueOf((int) cell.getNumericCellValue());
-            case BOOLEAN -> String.valueOf(cell.getBooleanCellValue());
-            default -> cell.toString();
+            case STRING -> cell.getStringCellValue();
+            case NUMERIC -> {
+                if (DateUtil.isCellDateFormatted(cell)) {
+                    yield new SimpleDateFormat("yyyy/MM/dd").format(cell.getDateCellValue());
+                } else {
+                    // Excelのシリアル値も日付として変換を試みる
+                    yield new SimpleDateFormat("yyyy/MM/dd").format(DateUtil.getJavaDate(cell.getNumericCellValue()));
+                }
+            }
+            case FORMULA -> {
+                FormulaEvaluator evaluator = cell.getSheet().getWorkbook().getCreationHelper().createFormulaEvaluator();
+                CellValue value = evaluator.evaluate(cell);
+                if (value.getCellType() == CellType.NUMERIC) {
+                    yield String.valueOf(value.getNumberValue());
+                } else {
+                    yield value.formatAsString();
+                }
+            }
+            default -> "";
         };
+    }
+
+    private String formatDateCell(Cell cell) {
+        if (cell == null || cell.getCellType() == CellType.BLANK) return "";
+
+        try {
+            if (cell.getCellType() == CellType.NUMERIC) {
+                double numericValue = cell.getNumericCellValue();
+
+                // 0 は "1899/12/31" になってしまうため排除
+                if (numericValue == 0.0) return "";
+
+                return new SimpleDateFormat("yyyy/MM/dd").format(DateUtil.getJavaDate(numericValue));
+            }
+
+            // 日付以外の文字列も考慮して fallback
+            return getCellValue(cell);
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+
+    private String calculateAge(String birthDateStr, String deathDateStr) {
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+            LocalDate birthDate = LocalDate.parse(birthDateStr, formatter);
+            LocalDate endDate = (deathDateStr == null || deathDateStr.isBlank())
+                    ? LocalDate.now()
+                    : LocalDate.parse(deathDateStr, formatter);
+
+            long years = ChronoUnit.YEARS.between(birthDate, endDate);
+            return years + "歳";
+        } catch (Exception e) {
+            return "";
+        }
     }
 }
