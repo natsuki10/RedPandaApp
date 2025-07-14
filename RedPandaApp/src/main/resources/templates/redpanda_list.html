@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>西山公園レッサーパンダ図鑑</title>
+    <style>
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ccc; padding: 8px; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+<h1>レッサーパンダ図鑑</h1>
+
+<p th:if="${error}" th:text="${error}" style="color:red;"></p>
+
+<table>
+    <thead>
+    <tr>
+        <th>名前</th>
+        <th>性別</th>
+        <th>生年月日</th>
+        <th>死亡日</th>
+        <th>年齢</th>
+        <th>他園移動日</th>
+        <th>他園移動園館</th>
+        <th>来園日</th>
+        <th>来園元園館</th>
+        <th>父親</th>
+        <th>母親</th>
+        <th>ペア1</th>
+        <th>ペア2</th>
+        <th>ペア3</th>
+        <th>性格</th>
+        <th>特徴</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="panda : ${pandaList}">
+        <td th:text="${panda.name}"></td>
+        <td th:text="${panda.gender}"></td>
+        <td th:text="${panda.birthDate}"></td>
+        <td th:text="${panda.deathDate}"></td>
+        <td th:text="${panda.age}"></td>
+        <td th:text="${panda.movedOutDate}"></td>
+        <td th:text="${panda.movedOutZoo}"></td>
+        <td th:text="${panda.arrivalDate}"></td>
+        <td th:text="${panda.originZoo}"></td>
+        <td th:text="${panda.father}"></td>
+        <td th:text="${panda.mother}"></td>
+        <td th:text="${panda.pair1}"></td>
+        <td th:text="${panda.pair2}"></td>
+        <td th:text="${panda.pair3}"></td>
+        <td th:text="${panda.personality}"></td>
+        <td th:text="${panda.feature}"></td>
+    </tr>
+    </tbody>
+</table>
+
+</body>
+</html>
