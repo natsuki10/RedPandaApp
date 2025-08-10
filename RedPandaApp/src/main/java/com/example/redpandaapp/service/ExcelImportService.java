@@ -41,7 +41,10 @@ public class ExcelImportService {
 
         return pandaList;
     }
-
+    
+    /*
+     * レッサーパンダ一覧を取得
+     */
     private List<RedPanda> parseExcel(InputStream inputStream) throws Exception {
         List<RedPanda> list = new ArrayList<>();
         Workbook workbook = new XSSFWorkbook(inputStream);
@@ -138,4 +141,20 @@ public class ExcelImportService {
             return "";
         }
     }
+    
+    /*
+     * 在園中のレッサーパンダ一覧を取得
+     */
+    public List<RedPanda> loadPostableRedPandas(String urlStr) {
+        List<RedPanda> all = loadRedPandas(urlStr);
+        return all.stream()
+                .filter(p -> isBlank(p.getDeathDate()))     // 死亡日なし
+                .filter(p -> isBlank(p.getMovedOutDate()))  // 他園移動日なし
+                .toList();
+    }
+
+    private boolean isBlank(String s) {
+        return s == null || s.trim().isEmpty();
+    }
+
 }

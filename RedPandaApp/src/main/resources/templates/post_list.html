@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>投稿一覧</title></head>
+<body>
+<h1>投稿一覧</h1>
+<p><a th:href="@{/posts/new}">新規投稿</a></p>
+
+<table border="1" cellpadding="6">
+  <tr>
+    <th>ID</th><th>個体名</th><th>コメント</th><th>日時</th>
+  </tr>
+  <tr th:each="p : ${posts}">
+    <td th:text="${p.id}"></td>
+    <td th:text="${p.pandaName}"></td>
+    <td th:text="${p.comment}"></td>
+    <td th:text="${#temporals.format(p.createdAt, 'yyyy/MM/dd HH:mm')}"></td>
+  </tr>
+</table>
+
+<p><a th:href="@{/redpandas}">図鑑へ</a></p>
+</body>
+</html>

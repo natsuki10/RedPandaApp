@@ -14,47 +14,62 @@
 
 <p th:if="${error}" th:text="${error}" style="color:red;"></p>
 
+<!-- 新規投稿ボタン -->
+<p style="text-align:right;">
+  <a th:href="@{/posts/new}">新規投稿</a>
+</p>
+
+<!-- 一覧 -->
 <table>
-    <thead>
-    <tr>
-        <th>名前</th>
-        <th>性別</th>
-        <th>生年月日</th>
-        <th>死亡日</th>
-        <th>年齢</th>
-        <th>他園移動日</th>
-        <th>他園移動園館</th>
-        <th>来園日</th>
-        <th>来園元園館</th>
-        <th>父親</th>
-        <th>母親</th>
-        <th>ペア1</th>
-        <th>ペア2</th>
-        <th>ペア3</th>
-        <th>性格</th>
-        <th>特徴</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="panda : ${pandaList}">
-        <td th:text="${panda.name}"></td>
-        <td th:text="${panda.gender}"></td>
-        <td th:text="${panda.birthDate}"></td>
-        <td th:text="${panda.deathDate}"></td>
-        <td th:text="${panda.age}"></td>
-        <td th:text="${panda.movedOutDate}"></td>
-        <td th:text="${panda.movedOutZoo}"></td>
-        <td th:text="${panda.arrivalDate}"></td>
-        <td th:text="${panda.originZoo}"></td>
-        <td th:text="${panda.father}"></td>
-        <td th:text="${panda.mother}"></td>
-        <td th:text="${panda.pair1}"></td>
-        <td th:text="${panda.pair2}"></td>
-        <td th:text="${panda.pair3}"></td>
-        <td th:text="${panda.personality}"></td>
-        <td th:text="${panda.feature}"></td>
-    </tr>
-    </tbody>
+<thead>
+<tr>
+    <th>名前</th>
+    <th>性別</th>
+    <th>生年月日</th>
+    <th>死亡日</th>
+    <th>年齢</th>
+    <th>他園移動日</th>
+    <th>他園移動園館</th>
+    <th>来園日</th>
+    <th>来園元園館</th>
+    <th>父親</th>
+    <th>母親</th>
+    <th>ペア1</th>
+    <th>ペア2</th>
+    <th>ペア3</th>
+    <th>性格</th>
+    <th>特徴</th>
+    <th>投稿</th>
+</tr>
+</thead>
+
+<tbody>
+<tr th:each="panda : ${pandaList}">
+    <td th:text="${panda.name}"></td>
+    <td th:text="${panda.gender}"></td>
+    <td th:text="${panda.birthDate}"></td>
+    <td th:text="${panda.deathDate}"></td>
+    <td th:text="${panda.age}"></td>
+    <td th:text="${panda.movedOutDate}"></td>
+    <td th:text="${panda.movedOutZoo}"></td>
+    <td th:text="${panda.arrivalDate}"></td>
+    <td th:text="${panda.originZoo}"></td>
+    <td th:text="${panda.father}"></td>
+    <td th:text="${panda.mother}"></td>
+    <td th:text="${panda.pair1}"></td>
+    <td th:text="${panda.pair2}"></td>
+    <td th:text="${panda.pair3}"></td>
+    <td th:text="${panda.personality}"></td>
+    <td th:text="${panda.feature}"></td>
+    <td>
+        <!-- 在園中の場合のみ表示 -->
+        <a th:if="${#strings.isEmpty(panda.deathDate)} and ${#strings.isEmpty(panda.movedOutDate)}"
+           th:href="@{/posts/new(pandaName=${panda.name})}">
+           投稿する
+        </a>
+    </td>
+</tr>
+</tbody>
 </table>
 
 </body>
