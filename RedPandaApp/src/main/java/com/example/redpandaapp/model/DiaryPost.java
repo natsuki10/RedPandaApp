@@ -22,5 +22,8 @@ public class DiaryPost {
     @Column(length = 1000)
     private String comment;
 
+    private String imageFilename;
+    
     private LocalDateTime createdAt = LocalDateTime.now();
+
 }

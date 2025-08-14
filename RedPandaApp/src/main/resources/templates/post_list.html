@@ -5,17 +5,42 @@
 <h1>投稿一覧</h1>
 <p><a th:href="@{/posts/new}">新規投稿</a></p>
 
+<form th:action="@{/posts}" method="get" style="margin-bottom:12px;">
+  <input type="text" name="q" th:value="${q}" placeholder="個体名で検索">
+  <button type="submit">検索</button>
+</form>
+
 <table border="1" cellpadding="6">
   <tr>
     <th>ID</th><th>個体名</th><th>コメント</th><th>日時</th>
   </tr>
-  <tr th:each="p : ${posts}">
+  <tr th:each="p : ${page.content}">
     <td th:text="${p.id}"></td>
-    <td th:text="${p.pandaName}"></td>
+	<td>
+	  <a th:href="@{/posts(pandaName=${p.pandaName})}"
+	     th:text="${p.pandaName}">name</a>
+	</td>
     <td th:text="${p.comment}"></td>
+	<td>
+		<img th:if="${p.imageFilename != null}"
+	    	th:src="@{/images/{f}(f=${p.imageFilename})}" style="max-height:120px;">
+	</td>
     <td th:text="${#temporals.format(p.createdAt, 'yyyy/MM/dd HH:mm')}"></td>
   </tr>
 </table>
+
+<div>
+  <a th:if="${!page.first}"
+     th:href="@{/posts(page=${page.number-1}, size=${page.size}, q=${q})}">前へ</a>
+  <span th:text="${page.number+1}"></span> / <span th:text="${page.totalPages}"></span>
+  <a th:if="${!page.last}"
+     th:href="@{/posts(page=${page.number+1}, size=${page.size}, q=${q})}">次へ</a>
+</div>
+
+
+<p th:if="${!#strings.isEmpty(filterName)}">
+  <a th:href="@{/posts}">全件表示に戻る</a>
+</p>
 
 <p><a th:href="@{/redpandas}">図鑑へ</a></p>
 </body>

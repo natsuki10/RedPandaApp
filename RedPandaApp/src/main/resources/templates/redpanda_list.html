@@ -72,5 +72,13 @@
 </tbody>
 </table>
 
+<div>
+  <a th:if="${page > 0}"
+     th:href="@{/redpandas(page=${page-1}, size=${size}, q=${q})}">前へ</a>
+  <span th:text="${page+1}"></span> / <span th:text="${totalPages}"></span>
+  <a th:if="${page+1 < totalPages}"
+     th:href="@{/redpandas(page=${page+1}, size=${size}, q=${q})}">次へ</a>
+</div>
+
 </body>
 </html>

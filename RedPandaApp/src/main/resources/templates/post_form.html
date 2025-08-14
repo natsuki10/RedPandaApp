@@ -4,7 +4,7 @@
 <body>
 <h1>Myレッサー日記・投稿</h1>
 
-<form th:action="@{/posts}" method="post" th:object="${post}">
+<form th:action="@{/posts}" method="post" th:object="${post}" enctype="multipart/form-data">
   <label>個体名：</label>
   <select th:field="*{pandaName}" required>
     <option value="" disabled selected>選択してください</option>
@@ -17,6 +17,8 @@
   <label>コメント：</label>
   <textarea th:field="*{comment}" rows="4" cols="40" required></textarea>
   <br/>
+  <label>写真：</label>
+    <input type="file" name="image" accept="image/*">
 
   <button type="submit">投稿する</button>
   <a th:href="@{/posts}">投稿一覧へ</a>
