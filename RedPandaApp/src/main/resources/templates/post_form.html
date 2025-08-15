@@ -1,31 +1,38 @@
+<!--投稿画面-->
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"><title>投稿フォーム</title></head>
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+	<head th:replace="_layout :: head(~{::title})">
+	  <title>日記投稿</title>
+	</head>
 <body>
-<h1>Myレッサー日記・投稿</h1>
-
-<form th:action="@{/posts}" method="post" th:object="${post}" enctype="multipart/form-data">
-  <label>個体名：</label>
-  <select th:field="*{pandaName}" required>
-    <option value="" disabled selected>選択してください</option>
-    <option th:each="p : ${postables}"
-            th:value="${p.name}"
-            th:text="${p.name}">name</option>
-  </select>
-  <br/>
-
-  <label>コメント：</label>
-  <textarea th:field="*{comment}" rows="4" cols="40" required></textarea>
-  <br/>
-  <label>写真：</label>
-    <input type="file" name="image" accept="image/*">
-
-  <button type="submit">投稿する</button>
-  <a th:href="@{/posts}">投稿一覧へ</a>
-</form>
-
-<p>
-  <a th:href="@{/redpandas}">図鑑に戻る</a>
-</p>
+<main th:replace="_layout :: layout(~{::content})">
+	<div th:fragment="content">
+	    <div class="card p-4">
+	      <h1 class="h4 mb-3">Myレッサー日記・投稿</h1>
+	      <form th:action="@{/posts}" method="post" th:object="${post}" enctype="multipart/form-data" class="row g-3">
+	        <div class="col-md-6">
+	          <label class="form-label">個体名</label>
+	          <select class="form-select" th:field="*{pandaName}" required>
+	            <option value="" disabled th:if="${#strings.isEmpty(post.pandaName)}" selected>選択してください</option>
+	            <option th:each="p : ${postables}" th:value="${p.name}" th:text="${p.name}">name</option>
+	          </select>
+	        </div>
+	        <div class="col-12">
+	          <label class="form-label">コメント</label>
+	          <textarea class="form-control" th:field="*{comment}" rows="4" required></textarea>
+	        </div>
+	        <div class="col-md-6">
+	          <label class="form-label">写真</label>
+	          <input class="form-control" type="file" name="image" accept="image/*">
+	        </div>
+	        <div class="col-12">
+	          <button class="btn btn-primary" type="submit">投稿する</button>
+	          <a class="btn btn-outline-secondary ms-2" th:href="@{/posts}">投稿一覧へ</a>
+	        </div>
+	      </form>
+	    </div>
+	</div>
+</main>
+</div>
 </body>
 </html>

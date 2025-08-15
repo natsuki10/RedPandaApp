@@ -1,84 +1,88 @@
+<!--西山公園レッサーパンダ図鑑-->
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>西山公園レッサーパンダ図鑑</title>
-    <style>
-        table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #ccc; padding: 8px; }
-        th { background-color: #f2f2f2; }
-    </style>
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+<head th:replace="_layout :: head(~{::title})">
+  <title>西山公園レッサーパンダ図鑑</title>
 </head>
 <body>
-<h1>レッサーパンダ図鑑</h1>
+<main th:replace="_layout :: layout(~{::content})">
+	<div th:fragment="content">
+		
+    <div class="d-flex align-items-center mb-3">
+      <h1 class="h3 mb-0">レッサーパンダ図鑑</h1>
+      <span class="badge rp-badge ms-2" th:text="${totalCount} + ' 件'"></span>
+    </div>
 
-<p th:if="${error}" th:text="${error}" style="color:red;"></p>
+    <form class="row g-2 mb-3" th:action="@{/redpandas}" method="get">
+      <div class="col-sm-6 col-md-4">
+        <input class="form-control" type="text" name="q" th:value="${q}" placeholder="名前・親・特徴で検索">
+      </div>
+      <input type="hidden" name="size" th:value="${size}">
+      <div class="col-auto">
+        <button class="btn btn-primary" type="submit">検索</button>
+      </div>
+    </form>
 
-<!-- 新規投稿ボタン -->
-<p style="text-align:right;">
-  <a th:href="@{/posts/new}">新規投稿</a>
-</p>
+    <div class="card p-2">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+          <tr>
+            <th>名前</th><th>性別</th><th>生年月日</th><th>死亡日</th><th>年齢</th>
+            <th>他園移動日</th><th>他園移動園館</th><th>来園日</th><th>来園元園館</th>
+            <th>父親</th><th>母親</th><th>ペア1</th><th>ペア2</th><th>ペア3</th>
+            <th>性格</th><th>特徴</th><th>投稿</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="panda : ${pandaList}">
+            <td>
+              <a th:href="@{/posts(pandaName=${panda.name})}" class="link-primary" th:text="${panda.name}"></a>
+            </td>
+            <td th:text="${panda.gender}"></td>
+            <td th:text="${panda.birthDate}"></td>
+            <td th:text="${panda.deathDate}"></td>
+            <td th:text="${panda.age}"></td>
+            <td th:text="${panda.movedOutDate}"></td>
+            <td th:text="${panda.movedOutZoo}"></td>
+            <td th:text="${panda.arrivalDate}"></td>
+            <td th:text="${panda.originZoo}"></td>
+            <td th:text="${panda.father}"></td>
+            <td th:text="${panda.mother}"></td>
+            <td th:text="${panda.pair1}"></td>
+            <td th:text="${panda.pair2}"></td>
+            <td th:text="${panda.pair3}"></td>
+            <td th:text="${panda.personality}"></td>
+            <td th:text="${panda.feature}"></td>
+            <td>
+              <a class="btn btn-sm btn-outline-success"
+                 th:if="${#strings.isEmpty(panda.deathDate)} and ${#strings.isEmpty(panda.movedOutDate)}"
+                 th:href="@{/posts/new(pandaName=${panda.name})}">投稿</a>
+            </td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(pandaList)}">
+            <td colspan="17" class="text-center text-muted py-4">該当データがありません</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
-<!-- 一覧 -->
-<table>
-<thead>
-<tr>
-    <th>名前</th>
-    <th>性別</th>
-    <th>生年月日</th>
-    <th>死亡日</th>
-    <th>年齢</th>
-    <th>他園移動日</th>
-    <th>他園移動園館</th>
-    <th>来園日</th>
-    <th>来園元園館</th>
-    <th>父親</th>
-    <th>母親</th>
-    <th>ペア1</th>
-    <th>ペア2</th>
-    <th>ペア3</th>
-    <th>性格</th>
-    <th>特徴</th>
-    <th>投稿</th>
-</tr>
-</thead>
-
-<tbody>
-<tr th:each="panda : ${pandaList}">
-    <td th:text="${panda.name}"></td>
-    <td th:text="${panda.gender}"></td>
-    <td th:text="${panda.birthDate}"></td>
-    <td th:text="${panda.deathDate}"></td>
-    <td th:text="${panda.age}"></td>
-    <td th:text="${panda.movedOutDate}"></td>
-    <td th:text="${panda.movedOutZoo}"></td>
-    <td th:text="${panda.arrivalDate}"></td>
-    <td th:text="${panda.originZoo}"></td>
-    <td th:text="${panda.father}"></td>
-    <td th:text="${panda.mother}"></td>
-    <td th:text="${panda.pair1}"></td>
-    <td th:text="${panda.pair2}"></td>
-    <td th:text="${panda.pair3}"></td>
-    <td th:text="${panda.personality}"></td>
-    <td th:text="${panda.feature}"></td>
-    <td>
-        <!-- 在園中の場合のみ表示 -->
-        <a th:if="${#strings.isEmpty(panda.deathDate)} and ${#strings.isEmpty(panda.movedOutDate)}"
-           th:href="@{/posts/new(pandaName=${panda.name})}">
-           投稿する
-        </a>
-    </td>
-</tr>
-</tbody>
-</table>
-
-<div>
-  <a th:if="${page > 0}"
-     th:href="@{/redpandas(page=${page-1}, size=${size}, q=${q})}">前へ</a>
-  <span th:text="${page+1}"></span> / <span th:text="${totalPages}"></span>
-  <a th:if="${page+1 < totalPages}"
-     th:href="@{/redpandas(page=${page+1}, size=${size}, q=${q})}">次へ</a>
+    <!-- ページャ -->
+    <nav class="d-flex justify-content-center mt-3" th:if="${totalPages > 1}">
+      <ul class="pagination pagination-sm mb-0">
+        <li class="page-item" th:classappend="${page == 0} ? 'disabled'">
+          <a class="page-link" th:href="@{/redpandas(page=${page-1}, size=${size}, q=${q})}">前へ</a>
+        </li>
+        <li class="page-item disabled">
+          <span class="page-link" th:text="${page+1} + ' / ' + ${totalPages}"></span>
+        </li>
+        <li class="page-item" th:classappend="${page+1 >= totalPages} ? 'disabled'">
+          <a class="page-link" th:href="@{/redpandas(page=${page+1}, size=${size}, q=${q})}">次へ</a>
+        </li>
+      </ul>
+    </nav>
+  </main>
 </div>
-
 </body>
 </html>

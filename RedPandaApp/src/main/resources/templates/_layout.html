@@ -1,0 +1,39 @@
+<!--共通レイアウト-->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+<head th:fragment="head(title)">
+  <meta charset="UTF-8">
+  <title th:replace="${title} ?: ~{}">Red Panda App</title>
+
+  <!-- Bootstrap 5 CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+  <style>
+    .card, .btn, .form-control, .form-select, .table { border-radius: 1rem; }
+    .navbar-brand { font-weight: 700; letter-spacing: .5px; }
+    .rp-badge { background: #ffe4ec; color: #b85672; }
+  </style>
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-expand-lg bg-white shadow-sm mb-3">
+  <div class="container">
+    <a class="navbar-brand" th:href="@{/redpandas}">🐼 RedPandaApp</a>
+    <div class="ms-auto">
+      <a class="btn btn-outline-primary btn-sm me-2" th:href="@{/redpandas}">図鑑</a>
+      <a class="btn btn-primary btn-sm" th:href="@{/posts}">日記</a>
+    </div>
+  </div>
+</nav>
+
+<!-- 子ページの中身を挿入するフラグメント -->
+<main class="container" th:fragment="layout(content)">
+  <th:block th:replace="${content}">Content</th:block>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+</body>
+</html>
