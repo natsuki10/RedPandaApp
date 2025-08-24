@@ -5,7 +5,7 @@
   <title>投稿一覧</title>
 </head>
 <body>
-<main th:replace="_layout :: layout(~{::content})">
+<main th:replace="_layout :: shell(~{::content})">
   <div th:fragment="content">
 	<div class="d-flex align-items-center mb-3">
 	  <h1 class="h4 mb-0" th:text="${#strings.isEmpty(pandaName) ? '投稿一覧' : pandaName + ' の投稿一覧'}"></h1>

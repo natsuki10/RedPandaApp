@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+<head th:replace="_layout :: head(~{::title})">
+  <title>レッサーパンダ図鑑</title>
+  <style>
+	.panda-card img {
+	    width: 100%;
+	    height: 200px;
+	    object-fit: cover; 
+	}
+
+    .rp-card img{ aspect-ratio: 4/3; object-fit: cover; }
+    .rp-badge-live{ background:#e8fff1; color:#157347; }
+    .rp-badge-past{ background:#fff0f0; color:#b02a37; }
+  </style>
+</head>
+<body>
+<main th:replace="_layout :: shell(~{::content})">
+  <div th:fragment="content">
+
+    <div class="d-flex align-items-center mb-3">
+      <h1 class="h4 mb-0">レッサーパンダ図鑑</h1>
+      <a class="btn btn-sm btn-primary ms-auto" th:href="@{/posts/new}">新規投稿</a>
+    </div>
+
+    <form class="row g-2 mb-3" th:action="@{/redpandas}" method="get">
+      <div class="col-sm-6 col-md-4">
+        <input class="form-control" type="text" name="q" th:value="${q}" placeholder="名前・親・特徴で検索">
+      </div>
+      <input type="hidden" name="size" th:value="${size}">
+      <div class="col-auto"><button class="btn btn-primary" type="submit">検索</button></div>
+    </form>
+
+    <!-- 在園中 -->
+    <div class="d-flex align-items-center mb-2">
+      <h2 class="h5 mb-0">在園中</h2>
+      <span class="badge rp-badge-live ms-2" th:text="${inParkTotal} + ' 件'"></span>
+    </div>
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-3 mb-4">
+      <div class="col" th:each="c : ${inParkCards}">
+        <div class="card rp-card h-100">
+          <img th:src="${c.thumbUrl}" class="card-img-top" alt="">
+          <div class="card-body">
+            <h3 class="h6 card-title mb-1">
+              <a th:href="@{/redpandas/{n}(n=${c.panda.name})}" class="stretched-link text-decoration-none"
+                 th:text="${c.panda.name}"></a>
+            </h3>
+            <div class="small text-muted">
+              <span th:text="${c.panda.gender}"></span> /
+              <span th:text="${c.panda.birthDate}"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="text-muted" th:if="${#lists.isEmpty(inParkCards)}">在園中の個体はいません</div>
+    </div>
+
+    <!-- 過去在園 -->
+    <div class="d-flex align-items-center mb-2">
+      <h2 class="h5 mb-0">過去在園</h2>
+      <span class="badge rp-badge-past ms-2" th:text="${pastTotal} + ' 件'"></span>
+    </div>
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-3 mb-3">
+      <div class="col" th:each="c : ${pastCards}">
+        <div class="card rp-card h-100">
+          <img th:src="${c.thumbUrl}" class="card-img-top" alt="">
+          <div class="card-body">
+            <h3 class="h6 card-title mb-1">
+              <a th:href="@{/redpandas/{n}(n=${c.panda.name})}" class="stretched-link text-decoration-none"
+                 th:text="${c.panda.name}"></a>
+            </h3>
+            <div class="small text-muted">
+              <span th:text="${c.panda.gender}"></span> /
+              <span th:text="${c.panda.birthDate}"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="text-muted" th:if="${#lists.isEmpty(pastCards)}">過去在園の個体はいません</div>
+    </div>
+
+    <!-- ページャ（最初/前/次/最後）: 在園・過去在園で同じpage/sizeを使います -->
+    <nav class="d-flex justify-content-center mt-2" th:if="${inParkTotalPages > 1 || pastTotalPages > 1}">
+      <ul class="pagination pagination-sm mb-0">
+        <li class="page-item" th:classappend="${page==0} ? 'disabled'">
+          <a class="page-link" th:href="@{/redpandas(page=${0}, size=${size}, q=${q})}">最初</a>
+        </li>
+        <li class="page-item" th:classappend="${page==0} ? 'disabled'">
+          <a class="page-link" th:href="@{/redpandas(page=${page-1}, size=${size}, q=${q})}">前へ</a>
+        </li>
+        <li class="page-item disabled">
+          <span class="page-link"
+                th:text="${page+1} + ' / ' +
+                         ${T(java.lang.Math).max(inParkTotalPages, pastTotalPages)}"></span>
+        </li>
+        <li class="page-item"
+            th:classappend="${page+1 >= T(java.lang.Math).max(inParkTotalPages, pastTotalPages)} ? 'disabled'">
+          <a class="page-link" th:href="@{/redpandas(page=${page+1}, size=${size}, q=${q})}">次へ</a>
+        </li>
+        <li class="page-item"
+            th:classappend="${page+1 >= T(java.lang.Math).max(inParkTotalPages, pastTotalPages)} ? 'disabled'">
+          <a class="page-link"
+             th:href="@{/redpandas(page=${T(java.lang.Math).max(inParkTotalPages, pastTotalPages)-1}, size=${size}, q=${q})}">
+            最後
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+  </div>
+</main>
+</body>
+</html>
