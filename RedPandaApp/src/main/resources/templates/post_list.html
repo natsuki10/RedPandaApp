@@ -7,12 +7,11 @@
 <body>
 <main th:replace="_layout :: layout(~{::content})">
   <div th:fragment="content">
-
-    <div class="d-flex align-items-center mb-3">
-      <h1 class="h4 mb-0" th:text="${#strings.isEmpty(pandaName) ? '投稿一覧' : pandaName + ' の投稿一覧'}"></h1>
-      <a class="btn btn-sm btn-primary ms-auto" th:href="@{/posts/new}">新規投稿</a>
-    </div>
-
+	<div class="d-flex align-items-center mb-3">
+	  <h1 class="h4 mb-0" th:text="${#strings.isEmpty(pandaName) ? '投稿一覧' : pandaName + ' の投稿一覧'}"></h1>
+	  <a class="btn btn-sm btn-outline-secondary ms-auto" th:href="@{/redpandas}">図鑑一覧へ</a>
+	  <a class="btn btn-sm btn-primary ms-2" th:href="@{/posts/new}">新規投稿</a>
+	</div>
     <form class="row g-2 mb-3" th:action="@{/posts}" method="get">
       <div class="col-sm-6 col-md-4">
         <input class="form-control" type="text" name="q" th:value="${q}" placeholder="個体名で検索">

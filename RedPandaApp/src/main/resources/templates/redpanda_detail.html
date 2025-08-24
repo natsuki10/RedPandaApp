@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+<head th:replace="_layout :: head(~{::title})">
+  <title th:text="${panda != null ? panda.name + ' の情報' : 'レッサーパンダ'}">詳細</title>
+</head>
+<body>
+<main th:replace="_layout :: layout(~{::content})">
+  <div th:fragment="content">
+
+    <div class="d-flex align-items-center mb-3">
+      <h1 class="h4 mb-0" th:text="${panda.name}">名前</h1>
+      <a class="btn btn-sm btn-primary ms-auto"
+         th:href="@{/posts/new(pandaName=${panda.name})}">この個体で新規投稿</a>
+      <a class="btn btn-sm btn-outline-secondary ms-2" th:href="@{/redpandas}">図鑑一覧へ</a>
+    </div>
+
+    <div class="card p-3 mb-4">
+      <div class="row g-2">
+        <div class="col-sm-6 col-md-3"><strong>性別</strong><div th:text="${panda.gender}"></div></div>
+        <div class="col-sm-6 col-md-3"><strong>生年月日</strong><div th:text="${panda.birthDate}"></div></div>
+        <div class="col-sm-6 col-md-3"><strong>死亡日</strong><div th:text="${panda.deathDate}"></div></div>
+        <div class="col-sm-6 col-md-3"><strong>年齢</strong><div th:text="${panda.age}"></div></div>
+
+        <div class="col-sm-6 col-md-3"><strong>他園移動日</strong><div th:text="${panda.movedOutDate}"></div></div>
+        <div class="col-sm-6 col-md-3"><strong>他園移動園館</strong><div th:text="${panda.movedOutZoo}"></div></div>
+        <div class="col-sm-6 col-md-3"><strong>来園日</strong><div th:text="${panda.arrivalDate}"></div></div>
+        <div class="col-sm-6 col-md-3"><strong>来園元園館</strong><div th:text="${panda.originZoo}"></div></div>
+
+        <div class="col-sm-6 col-md-3"><strong>父親</strong><div th:text="${panda.father}"></div></div>
+        <div class="col-sm-6 col-md-3"><strong>母親</strong><div th:text="${panda.mother}"></div></div>
+        <div class="col-sm-6 col-md-3"><strong>ペア1</strong><div th:text="${panda.pair1}"></div></div>
+        <div class="col-sm-6 col-md-3"><strong>ペア2</strong><div th:text="${panda.pair2}"></div></div>
+        <div class="col-sm-6 col-md-3"><strong>ペア3</strong><div th:text="${panda.pair3}"></div></div>
+
+        <div class="col-12"><strong>性格</strong><div th:text="${panda.personality}"></div></div>
+        <div class="col-12"><strong>特徴</strong><div th:text="${panda.feature}"></div></div>
+      </div>
+    </div>
+
+    <h2 class="h5 mb-2">この個体の日記</h2>
+    <div class="card p-2">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+          <tr><th>ID</th><th>コメント</th><th>画像</th><th>日時</th></tr>
+          </thead>
+          <tbody>
+          <tr th:each="p : ${page.content}">
+            <td th:text="${p.id}"></td>
+            <td th:text="${p.comment}"></td>
+            <td>
+              <img th:if="${p.imageFilename != null}" th:src="@{/images/{f}(f=${p.imageFilename})}"
+                   class="img-thumbnail" style="max-height:120px;">
+            </td>
+            <td th:text="${#temporals.format(p.createdAt, 'yyyy/MM/dd HH:mm')}"></td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(page.content)}">
+            <td colspan="4" class="text-center text-muted py-4">投稿はまだありません</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <nav class="d-flex justify-content-center mt-3" th:if="${page.totalPages > 1}">
+      <ul class="pagination pagination-sm mb-0">
+        <li class="page-item" th:classappend="${page.first} ? 'disabled'">
+          <a class="page-link" th:href="@{/redpandas/{name}(name=${panda.name}, page=${0}, size=${size})}">最初</a>
+        </li>
+        <li class="page-item" th:classappend="${page.first} ? 'disabled'">
+          <a class="page-link" th:href="@{/redpandas/{name}(name=${panda.name}, page=${page.number-1}, size=${size})}">前へ</a>
+        </li>
+        <li class="page-item disabled">
+          <span class="page-link" th:text="${page.number+1} + ' / ' + ${page.totalPages}"></span>
+        </li>
+        <li class="page-item" th:classappend="${page.last} ? 'disabled'">
+          <a class="page-link" th:href="@{/redpandas/{name}(name=${panda.name}, page=${page.number+1}, size=${size})}">次へ</a>
+        </li>
+        <li class="page-item" th:classappend="${page.last} ? 'disabled'">
+          <a class="page-link" th:href="@{/redpandas/{name}(name=${panda.name}, page=${page.totalPages-1}, size=${size})}">最後</a>
+        </li>
+      </ul>
+    </nav>
+
+  </div>
+</main>
+</body>
+</html>

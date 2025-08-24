@@ -8,6 +8,6 @@ import com.example.redpandaapp.model.DiaryPost;
 
 
 public interface DiaryPostRepository extends JpaRepository<DiaryPost, Long> {
-	Page<DiaryPost> findByPandaName(String pandaName, Pageable pageable);
+	Page<DiaryPost> findByPandaName(String name, Pageable p);
 	Page<DiaryPost> findByPandaNameContainingIgnoreCase(String q, Pageable pageable);
 }
