@@ -157,30 +157,52 @@ public class RedPandaController {
         return (int)Math.ceil((double)total / size);
     }
 
-    /** フラット方式専用: /static/pandas 直下の画像から、個体名に startsWith するファイルを列挙 */
+ //画像表示
     private List<String> imageUrls(String name) {
-        // /pandas は resources/static/pandas にマッピングされる
-        Set<String> children = servletContext.getResourcePaths("/pandas/");
-        if (children == null) return List.of();
-
+        
         String key = normalizeName(name);
-        List<String> result = new ArrayList<>();
 
-        children.stream()
-                // 直下のファイルのみ
-                .filter(p -> p.matches("(?i)^/pandas/[^/]+\\.(jpg|jpeg|png)$"))
-                // 個体名（正規化）で startsWith マッチ
-                .filter(p -> {
-                    String file = p.substring("/pandas/".length());      // 例: カイト1.jpg
-                    String base = file.replaceFirst("\\.[^.]+$", "");     // 例: カイト1
-                    return normalizeName(base).startsWith(key);           // 例: カイト*
-                })
-                .sorted()
-                .forEach(result::add);
+        // 1) 通常: /static/pandas 直下の公開URLをサーブレットから列挙
+        Set<String> children = servletContext.getResourcePaths("/pandas/");
+        List<String> urls = new ArrayList<>();
+        if (children != null && !children.isEmpty()) {
+            children.stream()
+                    .filter(p -> p.matches("(?i)^/pandas/[^/]+\\.(jpg|jpeg|png)$"))
+                    .filter(p -> {
+                        String file = p.substring("/pandas/".length());
+                        String base = file.replaceFirst("\\.[^.]+$", "");
+                        return normalizeName(base).startsWith(key);
+                    })
+                    .sorted()
+                    .forEach(urls::add);
+        }
 
-        // ここで返すのは /pandas/xxx.jpg 形式（<img src> でそのまま使える）
-        return result;
+        // 2) 取れない環境のフォールバック: classpath を走査して /pandas/<fn> 形式に変換
+        if (urls.isEmpty()) {
+            try {
+                var resolver = new org.springframework.core.io.support.PathMatchingResourcePatternResolver();
+                var jpgs  = resolver.getResources("classpath:/static/pandas/*.jpg");
+                var jpegs = resolver.getResources("classpath:/static/pandas/*.jpeg");
+                var pngs  = resolver.getResources("classpath:/static/pandas/*.png");
+
+                java.util.stream.Stream
+                    .of(jpgs, jpegs, pngs)
+                    .flatMap(java.util.Arrays::stream)
+                    .map(r -> Objects.requireNonNull(r.getFilename()))
+                    .filter(fn -> normalizeName(fn.replaceFirst("\\.[^.]+$", "")).startsWith(key))
+                    .sorted()
+                    .map(fn -> "/pandas/" + fn) // 公開URLに正規化
+                    .forEach(urls::add);
+
+            } catch (Exception ignore) {}
+        }
+        //デバック用
+        System.out.println("LOOKUP " + name + " -> key=" + normalizeName(name));
+        System.out.println("SERVLET children=" + servletContext.getResourcePaths("/pandas/"));
+
+        return urls;
     }
+
 
     private String firstImageUrl(String name) {
         List<String> all = imageUrls(name);

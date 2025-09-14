@@ -1,72 +1,72 @@
 <!--投稿一覧-->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="ja">
-<head th:replace="_layout :: head(~{::title})">
+<head th:replace="~{_layout :: head(~{::title})}">
   <title>投稿一覧</title>
 </head>
-<body>
-<main th:replace="_layout :: shell(~{::content})">
-  <div th:fragment="content">
-	<div class="d-flex align-items-center mb-3">
-	  <h1 class="h4 mb-0" th:text="${#strings.isEmpty(pandaName) ? '投稿一覧' : pandaName + ' の投稿一覧'}"></h1>
-	  <a class="btn btn-sm btn-outline-secondary ms-auto" th:href="@{/redpandas}">図鑑一覧へ</a>
-	  <a class="btn btn-sm btn-primary ms-2" th:href="@{/posts/new}">新規投稿</a>
-	</div>
-    <form class="row g-2 mb-3" th:action="@{/posts}" method="get">
-      <div class="col-sm-6 col-md-4">
-        <input class="form-control" type="text" name="q" th:value="${q}" placeholder="個体名で検索">
-      </div>
-      <input type="hidden" name="size" th:value="${size}">
-      <div class="col-auto"><button class="btn btn-outline-primary" type="submit">検索</button></div>
-      <div class="col-auto" th:if="${!#strings.isEmpty(pandaName)}">
-        <a class="btn btn-outline-secondary" th:href="@{/posts}">全件へ戻る</a>
-      </div>
-    </form>
-
-    <div class="card p-2">
-      <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-          <thead class="table-light">
-          <tr>
-            <th>ID</th><th>個体名</th><th>コメント</th><th>画像</th><th>日時</th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr th:each="p : ${page.content}">
-            <td th:text="${p.id}"></td>
-            <td><a th:href="@{/posts(pandaName=${p.pandaName})}" th:text="${p.pandaName}" class="link-primary"></a></td>
-            <td th:text="${p.comment}"></td>
-            <td>
-              <img th:if="${p.imageFilename != null}" th:src="@{/images/{f}(f=${p.imageFilename})}"
-                   class="img-thumbnail" style="max-height:120px;">
-            </td>
-            <td th:text="${#temporals.format(p.createdAt, 'yyyy/MM/dd HH:mm')}"></td>
-          </tr>
-          <tr th:if="${#lists.isEmpty(page.content)}">
-            <td colspan="5" class="text-center text-muted py-4">投稿がありません</td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <nav class="d-flex justify-content-center mt-3" th:if="${page.totalPages > 1}">
-      <ul class="pagination pagination-sm mb-0">
-        <li class="page-item" th:classappend="${page.first} ? 'disabled'">
-          <a class="page-link"
-             th:href="@{/posts(page=${page.number-1}, size=${size}, pandaName=${pandaName}, q=${q})}">前へ</a>
-        </li>
-        <li class="page-item disabled">
-          <span class="page-link" th:text="${page.number+1} + ' / ' + ${page.totalPages}"></span>
-        </li>
-        <li class="page-item" th:classappend="${page.last} ? 'disabled'">
-          <a class="page-link"
-             th:href="@{/posts(page=${page.number+1}, size=${size}, pandaName=${pandaName}, q=${q})}">次へ</a>
-        </li>
-      </ul>
-    </nav>
-
-  </div>
-</main>
+<body th:replace="~{_layout :: shell(~{::content})}">
+	<main>
+	  <div th:fragment="content">
+		<div class="d-flex align-items-center mb-3">
+		  <h1 class="h4 mb-0" th:text="${#strings.isEmpty(pandaName) ? '投稿一覧' : pandaName + ' の投稿一覧'}"></h1>
+		  <a class="btn btn-sm btn-outline-secondary ms-auto" th:href="@{/redpandas}">図鑑一覧へ</a>
+		  <a class="btn btn-sm btn-primary ms-2" th:href="@{/posts/new}">新規投稿</a>
+		</div>
+	    <form class="row g-2 mb-3" th:action="@{/posts}" method="get">
+	      <div class="col-sm-6 col-md-4">
+	        <input class="form-control" type="text" name="q" th:value="${q}" placeholder="個体名で検索">
+	      </div>
+	      <input type="hidden" name="size" th:value="${size}">
+	      <div class="col-auto"><button class="btn btn-outline-primary" type="submit">検索</button></div>
+	      <div class="col-auto" th:if="${!#strings.isEmpty(pandaName)}">
+	        <a class="btn btn-outline-secondary" th:href="@{/posts}">全件へ戻る</a>
+	      </div>
+	    </form>
+	
+	    <div class="card p-2">
+	      <div class="table-responsive">
+	        <table class="table table-hover align-middle mb-0">
+	          <thead class="table-light">
+	          <tr>
+	            <th>ID</th><th>個体名</th><th>コメント</th><th>画像</th><th>日時</th>
+	          </tr>
+	          </thead>
+	          <tbody>
+	          <tr th:each="p : ${page.content}">
+	            <td th:text="${p.id}"></td>
+	            <td><a th:href="@{/posts(pandaName=${p.pandaName})}" th:text="${p.pandaName}" class="link-primary"></a></td>
+	            <td th:text="${p.comment}"></td>
+	            <td>
+	              <img th:if="${p.imageFilename != null}" th:src="@{/images/{f}(f=${p.imageFilename})}"
+	                   class="img-thumbnail" style="max-height:120px;">
+	            </td>
+	            <td th:text="${#temporals.format(p.createdAt, 'yyyy/MM/dd HH:mm')}"></td>
+	          </tr>
+	          <tr th:if="${#lists.isEmpty(page.content)}">
+	            <td colspan="5" class="text-center text-muted py-4">投稿がありません</td>
+	          </tr>
+	          </tbody>
+	        </table>
+	      </div>
+	    </div>
+	
+	    <nav class="d-flex justify-content-center mt-3" th:if="${page.totalPages > 1}">
+	      <ul class="pagination pagination-sm mb-0">
+	        <li class="page-item" th:classappend="${page.first} ? 'disabled'">
+	          <a class="page-link"
+	             th:href="@{/posts(page=${page.number-1}, size=${size}, pandaName=${pandaName}, q=${q})}">前へ</a>
+	        </li>
+	        <li class="page-item disabled">
+	          <span class="page-link" th:text="${page.number+1} + ' / ' + ${page.totalPages}"></span>
+	        </li>
+	        <li class="page-item" th:classappend="${page.last} ? 'disabled'">
+	          <a class="page-link"
+	             th:href="@{/posts(page=${page.number+1}, size=${size}, pandaName=${pandaName}, q=${q})}">次へ</a>
+	        </li>
+	      </ul>
+	    </nav>
+	
+	  </div>
+  </main>
 </body>
 </html>
