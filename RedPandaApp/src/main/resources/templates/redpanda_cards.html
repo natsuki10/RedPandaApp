@@ -38,7 +38,7 @@
 	    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-3 mb-4">
 	      <div class="col" th:each="c : ${inParkCards}">
 	        <div class="card rp-card h-100">
-				<img th:src="@{${c.thumbUrl}}" alt="写真" class="panda-thumb img-fluid">
+				<img th:src="@{${c.thumbUrl}}" alt="写真" class="panda-thumb">
 	          <div class="card-body">
 	            <h3 class="h6 card-title mb-1">
 	              <a th:href="@{/redpandas/{n}(n=${c.panda.name})}" class="stretched-link text-decoration-none"
@@ -62,7 +62,7 @@
 	    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-3 mb-3">
 	      <div class="col" th:each="c : ${pastCards}">
 	        <div class="card rp-card h-100">
-				<img th:src="@{${c.thumbUrl}}" alt="写真" class="panda-thumb img-fluid">
+				<img th:src="@{${c.thumbUrl}}" alt="写真" class="panda-thumb">
 	          <div class="card-body">
 	            <h3 class="h6 card-title mb-1">
 	              <a th:href="@{/redpandas/{n}(n=${c.panda.name})}" class="stretched-link text-decoration-none"

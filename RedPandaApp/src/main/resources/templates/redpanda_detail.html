@@ -3,16 +3,23 @@
 <head th:replace="~{_layout :: head(~{::title})}">
   <title th:text="${panda != null ? panda.name + ' の情報' : 'レッサーパンダ'}">詳細</title>
   <style>
-    .fadebox{ position:relative; height:320px; border-radius:1rem; overflow:hidden; }
-    .fadebox img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0;
-      transition: opacity 800ms ease; }
-    .fadebox img.active{ opacity:1; }
-	.panda-detail {
-	  max-width: 480px; 
+    .fadebox{
+      position:relative; height:320px; border-radius:1rem; overflow:hidden; background:#f7f7f7;
 	  width: 100%;
-	  height: auto;
-	  object-fit: contain;
-	}
+	  max-width: 900px;
+    }
+    .fadebox .hero{
+      position:absolute; inset:0;
+	  width: 100%;
+	  max-width: 900px;
+	  aspect-ratio: 4 / 3;
+	  object-fit: cover;
+	  display: block;
+	  border-radius: .75rem;
+	  background: #f7f7f7;
+      object-fit:cover; opacity:0; transition:opacity 800ms ease;
+    }
+    .fadebox .hero.is-active{ opacity:1; }
   </style>
 </head>
 <body th:replace="~{_layout :: shell(~{::content})}">
@@ -26,9 +33,12 @@
     </div>
 
     <!-- 画像スライド -->
-    <div class="fadebox mb-3">
-		<img th:src="${img}" alt="photo" class="panda-detail img-fluid">
-    </div>
+	<div class="fadebox mb-3">
+	  <img th:each="img, i : ${images}"
+	       th:src="${img}"
+	       class="hero"
+	       th:classappend="${i.index == 0} ? ' is-active'">
+	</div>
 
     <!-- 個体情報（全項目） -->
     <div class="card p-3 mb-4">
@@ -95,18 +105,17 @@
     </nav>
 
     <!-- 画像スライド（4秒間隔） -->
-    <script>
-      (function(){
-        const imgs = document.querySelectorAll('.fadebox img');
-        if(!imgs.length) return;
-        let i = 0;
-        setInterval(()=>{
-          imgs[i].classList.remove('active');
-          i = (i + 1) % imgs.length;
-          imgs[i].classList.add('active');
-        }, 4000);
-      })();
-    </script>
+	<script th:inline="javascript">
+	  const slides = Array.from(document.querySelectorAll('.fadebox .hero'));
+	  if (slides.length > 1) {
+	    let k = 0;
+	    setInterval(() => {
+	      slides[k].classList.remove('is-active');
+	      k = (k + 1) % slides.length;
+	      slides[k].classList.add('is-active');
+	    }, 4000);
+	  }
+	</script>
 
   </div>
 </main>
