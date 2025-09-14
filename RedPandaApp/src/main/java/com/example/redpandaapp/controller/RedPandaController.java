@@ -1,15 +1,14 @@
 package com.example.redpandaapp.controller;
 
-import java.nio.charset.StandardCharsets;
+import java.text.Normalizer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.regex.Pattern;
 
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,41 +18,43 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.util.UriUtils;
 
 import com.example.redpandaapp.model.DiaryPost;
 import com.example.redpandaapp.model.RedPanda;
 import com.example.redpandaapp.repository.DiaryPostRepository;
 import com.example.redpandaapp.service.ExcelImportService;
 
+import jakarta.servlet.ServletContext;
+
 @Controller
 public class RedPandaController {
 
     private final ExcelImportService excelImportService;
     private final DiaryPostRepository diaryRepo;
-    private final PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+    private final ServletContext servletContext; // フラット方式の列挙に使用
 
     public RedPandaController(ExcelImportService excelImportService,
-                              DiaryPostRepository diaryRepo) {
+                              DiaryPostRepository diaryRepo,
+                              ServletContext servletContext) {
         this.excelImportService = excelImportService;
         this.diaryRepo = diaryRepo;
+        this.servletContext = servletContext;
     }
 
     private static final String EXCEL_URL =
         "https://ckan.odp.jig.jp/dataset/d62824ca-8b19-4d8f-b81d-7f7cc114f25d/resource/ccc95c6d-e3d0-4dd6-99fb-163704f5ab33/download/-.xlsx";
 
-    // ---------- 一覧（カード表示・在園/過去在園を分ける + ページング + 検索） ----------
+    // ===== 一覧（カード表示・在園/過去在園・検索・ページング） =====
     @GetMapping("/redpandas")
     public String listRedPandas(
             @RequestParam(name = "q", required = false) String q,
             @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "12") int size, // カードなので12/ページを既定
+            @RequestParam(name = "size", defaultValue = "12") int size,
             Model model) {
 
         List<RedPanda> all = excelImportService.loadRedPandas(EXCEL_URL);
         if (all == null) all = List.of();
 
-        // 検索（名前・親・特徴・来園元）
         final String qq = (q == null) ? "" : q.trim().toLowerCase();
         List<RedPanda> filtered = (qq.isEmpty()) ? all : all.stream().filter(p ->
                 contains(p.getName(), qq) || contains(p.getFather(), qq) ||
@@ -61,10 +62,9 @@ public class RedPandaController {
                 contains(p.getOriginZoo(), qq)
         ).toList();
 
-        // 在園 (=死亡日なし && 他園移動日なし)
+        // 在園 (= 死亡日なし && 他園移動日なし) を上、過去在園を下。いずれも生年月日降順。
         List<RedPanda> inPark = filtered.stream()
                 .filter(this::isInPark)
-                // 生年月日が新しい順（文字列 yyyy/MM/dd 前提：降順）
                 .sorted(Comparator.comparing(RedPanda::getBirthDate, nullsLastDesc()))
                 .toList();
 
@@ -73,7 +73,7 @@ public class RedPandaController {
                 .sorted(Comparator.comparing(RedPanda::getBirthDate, nullsLastDesc()))
                 .toList();
 
-        // サムネURLを付与したカードに変換
+        // サムネURL（最初の1枚）を付与
         List<PandaCard> inParkCards = inPark.stream()
                 .map(p -> new PandaCard(p, firstImageUrl(p.getName())))
                 .toList();
@@ -81,7 +81,7 @@ public class RedPandaController {
                 .map(p -> new PandaCard(p, firstImageUrl(p.getName())))
                 .toList();
 
-        // カードの手作りページング（在園と過去在園をそれぞれ分ける）
+        // 手作りページング（在園/過去在園は独立）
         var inParkPaged = paginate(inParkCards, page, size);
         var pastPaged   = paginate(pastCards, page, size);
 
@@ -100,7 +100,7 @@ public class RedPandaController {
         return "redpanda_cards";
     }
 
-    // ---------- 詳細（③ 画像スライド + 投稿一覧） ----------
+    // ===== 詳細（画像スライド + 投稿一覧） =====
     @GetMapping("/redpandas/{name}")
     public String detail(@PathVariable("name") String name,
                          @RequestParam(name="page", defaultValue="0") int page,
@@ -130,7 +130,7 @@ public class RedPandaController {
         return "redpanda_detail";
     }
 
-    // ---------- helper ----------
+    // ===== helper =====
     private boolean isInPark(RedPanda p) {
         return isBlank(p.getDeathDate()) && isBlank(p.getMovedOutDate());
     }
@@ -156,56 +156,44 @@ public class RedPandaController {
         if (size <= 0) size = 12;
         return (int)Math.ceil((double)total / size);
     }
-/*
-    private String firstImageUrl(String name) {
-        List<String> all = imageUrls(name);
-        return all.isEmpty() ? "/pandas/placeholder.jpg" : all.get(0);
-    }
-*/
-    /** /static/pandas/<name>/*.jpg を列挙して URL に変換 */
+
+    /** フラット方式専用: /static/pandas 直下の画像から、個体名に startsWith するファイルを列挙 */
     private List<String> imageUrls(String name) {
-        try {
-            String encName = UriUtils.encodePathSegment(name, StandardCharsets.UTF_8);
-            List<Resource> found = new ArrayList<>();
+        // /pandas は resources/static/pandas にマッピングされる
+        Set<String> children = servletContext.getResourcePaths("/pandas/");
+        if (children == null) return List.of();
 
-            // 1) サブフォルダ方式: /pandas/<name>/*.jpg|png
-            found.addAll(Arrays.asList(resolver.getResources("classpath:/static/pandas/" + name + "/*.jpg")));
-            found.addAll(Arrays.asList(resolver.getResources("classpath:/static/pandas/" + name + "/*.jpeg")));
-            found.addAll(Arrays.asList(resolver.getResources("classpath:/static/pandas/" + name + "/*.png")));
+        String key = normalizeName(name);
+        List<String> result = new ArrayList<>();
 
-            // 2) フラット方式: /pandas/<name>*.jpg|png
-            found.addAll(Arrays.asList(resolver.getResources("classpath:/static/pandas/" + name + "*.jpg")));
-            found.addAll(Arrays.asList(resolver.getResources("classpath:/static/pandas/" + name + "*.jpeg")));
-            found.addAll(Arrays.asList(resolver.getResources("classpath:/static/pandas/" + name + "*.png")));
+        children.stream()
+                // 直下のファイルのみ
+                .filter(p -> p.matches("(?i)^/pandas/[^/]+\\.(jpg|jpeg|png)$"))
+                // 個体名（正規化）で startsWith マッチ
+                .filter(p -> {
+                    String file = p.substring("/pandas/".length());      // 例: カイト1.jpg
+                    String base = file.replaceFirst("\\.[^.]+$", "");     // 例: カイト1
+                    return normalizeName(base).startsWith(key);           // 例: カイト*
+                })
+                .sorted()
+                .forEach(result::add);
 
-            return found.stream()
-                    .map(r -> {
-                        String fn = Objects.requireNonNull(r.getFilename());
-                        String url; // 実際のURLを決める
-                        try {
-                            String path = r.getURL().toString();
-                            if (path.contains("/pandas/" + name + "/")) {
-                                // サブフォルダ方式
-                                url = "/pandas/" + encName + "/" + fn;
-                            } else {
-                                // フラット方式
-                                url = "/pandas/" + fn;
-                            }
-                        } catch (Exception e) {
-                            url = "/pandas/" + fn;
-                        }
-                        return url;
-                    })
-                    .distinct()    // 重複除去
-                    .sorted()
-                    .toList();
-        } catch (Exception e) {
-            return List.of();
-        }
+        // ここで返すのは /pandas/xxx.jpg 形式（<img src> でそのまま使える）
+        return result;
     }
 
     private String firstImageUrl(String name) {
         List<String> all = imageUrls(name);
         return all.isEmpty() ? "/pandas/placeholder.jpg" : all.get(0);
+    }
+
+    // 名前の正規化（全角→半角/互換正規化・小文字化・空白/記号除去）
+    private static final Pattern DROP = Pattern.compile("[\\p{Punct}\\p{Space}＿　・/（）()［］\\[\\]…‥‐―ー~〜・]+");
+    private String normalizeName(String s) {
+        if (s == null) return "";
+        String nfkc = Normalizer.normalize(s, Normalizer.Form.NFKC);
+        nfkc = nfkc.toLowerCase();
+        nfkc = DROP.matcher(nfkc).replaceAll("");
+        return nfkc;
     }
 }

@@ -7,6 +7,12 @@
     .fadebox img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0;
       transition: opacity 800ms ease; }
     .fadebox img.active{ opacity:1; }
+	.panda-detail{
+		max-width: 400px;
+		height: auto;
+		object-fit: contain;
+		border-radius: 8px;
+	}
   </style>
 </head>
 <body>
@@ -21,7 +27,7 @@
 
     <!-- 画像スライド -->
     <div class="fadebox mb-3">
-      <img th:each="src,iter : ${images}" th:src="${src}" th:classappend="${iter.index==0} ? 'active'">
+      <img th:each="src,iter : ${images}" th:src="${src}" th:classappend="${iter.index==0} ? 'active'" class="panda-detail">
     </div>
 
     <!-- 個体情報（全項目） -->
