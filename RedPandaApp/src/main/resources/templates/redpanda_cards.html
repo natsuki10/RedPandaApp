@@ -9,8 +9,9 @@
 	    object-fit: cover; 
 	}
     .rp-card img{ aspect-ratio: 4/3; object-fit: cover; }
-    .rp-badge-live{ background:#e8fff1; color:#157347; }
-    .rp-badge-past{ background:#fff0f0; color:#b02a37; }
+	.badge{
+		color: black;
+	}
   </style>
 </head>
 <body th:replace="~{_layout :: shell(~{::content})}">
@@ -18,7 +19,7 @@
 	  <div th:fragment="content">
 	
 	    <div class="d-flex align-items-center mb-3">
-	      <h1 class="h4 mb-0">レッサーパンダ図鑑</h1>
+	      <h1 class="h4 mb-0">西山公園のレッサーパンダ</h1>
 	      <a class="btn btn-sm btn-primary ms-auto" th:href="@{/posts/new}">新規投稿</a>
 	    </div>
 	
@@ -105,7 +106,6 @@
 	        </li>
 	      </ul>
 	    </nav>
-	
 	  </div>
 	</main>
 </body>

@@ -19,6 +19,8 @@ import com.example.redpandaapp.model.RedPanda;
 import com.example.redpandaapp.repository.DiaryPostRepository;
 import com.example.redpandaapp.service.ExcelImportService;
 
+import jakarta.validation.Valid;
+
 @Controller
 @RequestMapping("/posts")
 public class DiaryController {
@@ -80,9 +82,25 @@ public class DiaryController {
 
     /** 投稿登録（画像アップロード対応） */
     @PostMapping
-    public String create(@ModelAttribute("post") DiaryPost post,
-                         @RequestParam(value = "image", required = false) org.springframework.web.multipart.MultipartFile image,
-                         @org.springframework.beans.factory.annotation.Value("${app.upload-dir}") String uploadDir) throws Exception {
+    public String create(
+            @Valid @ModelAttribute("post") DiaryPost post,
+            org.springframework.validation.BindingResult binding,
+            @RequestParam(value = "image", required = false) org.springframework.web.multipart.MultipartFile image,
+            @org.springframework.beans.factory.annotation.Value("${app.upload-dir}") String uploadDir,
+            Model model) throws Exception {
+
+        // 画面に戻るときに必要
+        if (binding.hasErrors()) {
+            model.addAttribute("postables", excel.loadPostableRedPandas(EXCEL_URL));
+            return "post_form";
+        }
+
+        // 写真が必須
+        if (image == null || image.isEmpty()) {
+            binding.rejectValue("imageFilename", "image.required", "写真は必須です。");
+            model.addAttribute("postables", excel.loadPostableRedPandas(EXCEL_URL));
+            return "post_form";
+        }
 
         if (image != null && !image.isEmpty()) {
             String ct = image.getContentType();

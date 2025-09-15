@@ -10,21 +10,33 @@
 		    <div class="card p-4">
 		      <h1 class="h4 mb-3">Myレッサー日記・投稿</h1>
 		      <form th:action="@{/posts}" method="post" th:object="${post}" enctype="multipart/form-data" class="row g-3">
-		        <div class="col-md-6">
+				<div th:if="${#fields.hasErrors()}" class="alert alert-danger">
+				    <ul class="mb-0">
+				      <li th:each="e : ${#fields.errors('*')}" th:text="${e}">エラー</li>
+				    </ul>
+				 </div>
+				<div class="col-md-6">
 		          <label class="form-label">個体名</label>
 		          <select class="form-select" th:field="*{pandaName}" required>
 		            <option value="" disabled th:if="${#strings.isEmpty(post.pandaName)}" selected>選択してください</option>
 		            <option th:each="p : ${postables}" th:value="${p.name}" th:text="${p.name}">name</option>
 		          </select>
 		        </div>
-		        <div class="col-12">
-		          <label class="form-label">コメント</label>
-		          <textarea class="form-control" th:field="*{comment}" rows="4" required></textarea>
-		        </div>
-		        <div class="col-md-6">
-		          <label class="form-label">写真</label>
-		          <input class="form-control" type="file" name="image" accept="image/*">
-		        </div>
+				<div class="col-12">
+				  <label class="form-label">コメント</label>
+				  <textarea class="form-control"
+				           th:field="*{comment}" rows="4" required
+				           th:classappend="${#fields.hasErrors('comment')} ? ' is-invalid'"></textarea>
+				  <div class="invalid-feedback" th:if="${#fields.hasErrors('comment')}"
+				       th:errors="*{comment}"></div>
+				</div>
+				<div class="col-md-6">
+				  <label class="form-label">写真</label>
+				  <input class="form-control" type="file" name="image" accept="image/*" required
+				         th:classappend="${#fields.hasErrors('imageFilename')} ? ' is-invalid'">
+				  <div class="invalid-feedback" th:if="${#fields.hasErrors('imageFilename')}"
+				       th:errors="*{imageFilename}"></div>
+				</div>
 		        <div class="col-12">
 		          <button class="btn btn-primary" type="submit">投稿する</button>
 		          <a class="btn btn-outline-secondary ms-2" th:href="@{/posts}">投稿一覧へ</a>

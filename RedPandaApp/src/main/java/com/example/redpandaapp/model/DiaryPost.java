@@ -7,6 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Entity
@@ -20,6 +21,7 @@ public class DiaryPost {
     private String pandaName;
 
     @Column(length = 1000)
+    @NotBlank(message = "コメントは必須です。")
     private String comment;
 
     private String imageFilename;

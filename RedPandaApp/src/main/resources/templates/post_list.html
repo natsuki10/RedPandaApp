@@ -34,7 +34,8 @@
 	          <tbody>
 	          <tr th:each="p : ${page.content}">
 	            <td th:text="${p.id}"></td>
-	            <td><a th:href="@{/posts(pandaName=${p.pandaName})}" th:text="${p.pandaName}" class="link-primary"></a></td>
+	            <td><a th:href="@{/redpandas/{n}(n=${p.pandaName})}"
+				     th:text="${p.pandaName}" class="link-primary"></a></td>
 	            <td th:text="${p.comment}"></td>
 	            <td>
 	              <img th:if="${p.imageFilename != null}" th:src="@{/images/{f}(f=${p.imageFilename})}"
