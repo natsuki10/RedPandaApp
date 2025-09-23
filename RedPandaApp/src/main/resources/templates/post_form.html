@@ -8,7 +8,7 @@
 	<main>
 		<div th:fragment="content">
 		    <div class="card p-4">
-		      <h1 class="h4 mb-3">Myレッサー日記・投稿</h1>
+		      <h1 class="h4 mb-3">新規投稿</h1>
 		      <form th:action="@{/posts}" method="post" th:object="${post}" enctype="multipart/form-data" class="row g-3">
 				<div th:if="${#fields.hasErrors()}" class="alert alert-danger">
 				    <ul class="mb-0">
@@ -24,6 +24,7 @@
 		        </div>
 				<div class="col-12">
 				  <label class="form-label">コメント</label>
+				  <a>※個人情報や誹謗中傷は書き込まないでください。</a>
 				  <textarea class="form-control"
 				           th:field="*{comment}" rows="4" required
 				           th:classappend="${#fields.hasErrors('comment')} ? ' is-invalid'"></textarea>
@@ -31,7 +32,7 @@
 				       th:errors="*{comment}"></div>
 				</div>
 				<div class="col-md-6">
-				  <label class="form-label">写真</label>
+				  <label class="form-label">レッサーパンダの写真</label>
 				  <input class="form-control" type="file" name="image" accept="image/*" required
 				         th:classappend="${#fields.hasErrors('imageFilename')} ? ' is-invalid'">
 				  <div class="invalid-feedback" th:if="${#fields.hasErrors('imageFilename')}"
