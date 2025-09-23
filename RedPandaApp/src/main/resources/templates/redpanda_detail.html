@@ -3,16 +3,22 @@
 <head th:replace="~{_layout :: head(~{::title})}">
   <title th:text="${panda != null ? panda.name + ' の情報' : 'レッサーパンダ'}">詳細</title>
   <style>
-	/* 詳細ページのカルーセルの高さを統一（好みで調整） */
-	.panda-carousel { 
-		max-height: 420px; 
-		max-width: 400px;
-	}
-	.panda-carousel .carousel-item img {
-	  height: 100%;
-	  object-fit: cover;  
-	  border-radius: 1rem;
-	}
+    .panda-carousel{
+      width: 100%;
+      max-width: none;        
+      aspect-ratio: 4 / 3;   
+      max-height: 420px;      
+    }
+    .panda-carousel .carousel-item img{
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 1rem;
+    }
+    @media (max-width: 576px){
+      .panda-carousel{ max-height: 260px; }
+	  .table { font-size: .9rem; }
+    }
   </style>
 </head>
 <body th:replace="~{_layout :: shell(~{::content})}">
@@ -24,77 +30,81 @@
       <a class="btn btn-sm btn-primary ms-auto" th:href="@{/posts/new(pandaName=${panda.name})}">この個体で新規投稿</a>
       <a class="btn btn-sm btn-outline-secondary ms-2" th:href="@{/redpandas}">図鑑一覧へ</a>
     </div>
-
-	<div class="row">
-		<div class="col-md-6">
-			<!-- 画像カルーセル -->
-			<div id="pandaCarousel"
-			     class="carousel slide mb-3"
-			     data-bs-ride="carousel"
-			     data-bs-interval="4000"
-			     th:with="many=${#lists.size(images) > 1}">
-			
-			  <!-- インジケータ -->
-			  <div class="carousel-indicators" th:if="${many}">
-			    <button th:each="img,i : ${images}"
-			            type="button"
-			            th:attr="
-			              data-bs-target='#pandaCarousel',
-			              data-bs-slide-to=${i.index},
-			              aria-label=|Slide ${i.index+1}|,
-			              aria-current=${i.index==0} ? 'true' : null
-			            "
-			            th:classappend="${i.index==0} ? ' active'">
-			    </button>
-			  </div>
-			
-			  <!-- スライド本体 -->
-			  <div class="carousel-inner panda-carousel">
-			    <div th:each="img,i : ${images}"
-			         class="carousel-item"
-			         th:classappend="${i.index==0} ? ' active'">
-			      <img th:src="@{${img}}"
-			           class="d-block w-100"
-			           th:alt="|${panda.name} の写真 ${i.index+1}|"
-			           loading="lazy">
-			    </div>
-			  </div>
-			
-			  <!-- 前後ボタン -->
-			  <button class="carousel-control-prev" type="button" th:if="${many}"
-			          data-bs-target="#pandaCarousel" data-bs-slide="prev">
-			    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-			    <span class="visually-hidden">前へ</span>
-			  </button>
-			  <button class="carousel-control-next" type="button" th:if="${many}"
-			          data-bs-target="#pandaCarousel" data-bs-slide="next">
-			    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-			    <span class="visually-hidden">次へ</span>
-			  </button>
-			</div>
-		</div>
 	
-	    <!-- 個体情報（全項目） -->
-		<div class="col-md-6">
-		    <div class="card p-3 mb-4">
-		      <div class="row g-2">
-		        <div class="col-sm-6 col-md-3"><strong>性別</strong><div th:text="${panda.gender}"></div></div>
-		        <div class="col-sm-6 col-md-3"><strong>生年月日</strong><div th:text="${panda.birthDate}"></div></div>
-		        <div class="col-sm-6 col-md-3"><strong>~</strong><div th:text="${panda.deathDate}"></div></div>
-		        <div class="col-sm-6 col-md-3"><strong>年齢</strong><div th:text="${panda.age}"></div></div>
+	<div class="card p-3 mb-4">
+		<div class="row g-3 align-items-start">
+			<div class="col-12 col-lg-5 text-center">
+				<!-- 画像カルーセル -->
+				<div id="pandaCarousel"
+				     class="carousel slide mb-3"
+				     data-bs-ride="carousel"
+				     data-bs-interval="4000"
+				     th:with="many=${#lists.size(images) > 1}">
+				
+				  <!-- インジケータ -->
+				  <div class="carousel-indicators" th:if="${many}">
+				    <button th:each="img,i : ${images}"
+				            type="button"
+				            th:attr="
+				              data-bs-target='#pandaCarousel',
+				              data-bs-slide-to=${i.index},
+				              aria-label=|Slide ${i.index+1}|,
+				              aria-current=${i.index==0} ? 'true' : null
+				            "
+				            th:classappend="${i.index==0} ? ' active'">
+				    </button>
+				  </div>
+				
+				  <!-- スライド本体 -->
+				  <div class="carousel-inner panda-carousel">
+				    <div th:each="img,i : ${images}"
+				         class="carousel-item"
+				         th:classappend="${i.index==0} ? ' active'">
+				      <img th:src="@{${img}}"
+				           class="d-block w-100"
+				           th:alt="|${panda.name} の写真 ${i.index+1}|"
+				           loading="lazy">
+				    </div>
+				  </div>
+				
+				  <!-- 前後ボタン -->
+				  <button class="carousel-control-prev" type="button" th:if="${many}"
+				          data-bs-target="#pandaCarousel" data-bs-slide="prev">
+				    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+				    <span class="visually-hidden">前へ</span>
+				  </button>
+				  <button class="carousel-control-next" type="button" th:if="${many}"
+				          data-bs-target="#pandaCarousel" data-bs-slide="next">
+				    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+				    <span class="visually-hidden">次へ</span>
+				  </button>
+				</div>
+			</div>
 		
-		        <div class="col-sm-6 col-md-3"><strong>他園移動日</strong><div th:text="${panda.movedOutDate}"></div></div>
-		        <div class="col-sm-6 col-md-3"><strong>他園移動園館</strong><div th:text="${panda.movedOutZoo}"></div></div>
-		        <div class="col-sm-6 col-md-3"><strong>来園日</strong><div th:text="${panda.arrivalDate}"></div></div>
-		        <div class="col-sm-6 col-md-3"><strong>来園元園館</strong><div th:text="${panda.originZoo}"></div></div>
-		
-		        <div class="col-sm-6 col-md-3"><strong>父親</strong><div th:text="${panda.father}"></div></div>
-		        <div class="col-sm-6 col-md-3"><strong>母親</strong><div th:text="${panda.mother}"></div></div>
-		        <div class="col-sm-6 col-md-3"><strong>ペア</strong><div th:text="${panda.pair1}"></div><div th:text="${panda.pair2}"></div><div th:text="${panda.pair3}"></div></div>
-   				<div class="col-12"><strong>性格</strong><div th:text="${panda.personality}"></div></div>
-		        <div class="col-12"><strong>特徴</strong><div th:text="${panda.feature}"></div></div>
-		      </div>
-		    </div>
+		    <!-- 個体情報（全項目） -->
+			<div class="col-12 col-lg-7">
+			    <div class="card p-3 mb-4">
+			      <div class="row g-2">
+			        <div class="col-12"><strong>性別</strong><div th:text="${panda.gender}"></div></div>
+					<div class="col-6">
+					 	<strong>生年月日</strong>
+							<div th:text="${panda.birthDate} + ' ～ ' + (${panda.deathDate} != null ? panda.deathDate : '')"></div>
+			        </div>
+					<div class="col-6"><strong>年齢</strong><div th:text="${panda.age}"></div></div>
+			
+			        <div class="col-6"><strong>他園移動日</strong><div th:text="${panda.movedOutDate}"></div></div>
+			        <div class="col-6"><strong>他園移動園館</strong><div th:text="${panda.movedOutZoo}"></div></div>
+			        <div class="col-6"><strong>来園日</strong><div th:text="${panda.arrivalDate}"></div></div>
+			        <div class="col-6"><strong>来園元園館</strong><div th:text="${panda.originZoo}"></div></div>
+			
+			        <div class="col-6"><strong>父親</strong><div th:text="${panda.father}"></div></div>
+			        <div class="col-6"><strong>母親</strong><div th:text="${panda.mother}"></div></div>
+			        <div class="col-6"><strong>ペア</strong><div th:text="${panda.pair1}"></div><div th:text="${panda.pair2}"></div><div th:text="${panda.pair3}"></div></div>
+	   				<div class="col-12"><strong>性格</strong><div th:text="${panda.personality}"></div></div>
+			        <div class="col-12"><strong>特徴</strong><div th:text="${panda.feature}"></div></div>
+			      </div>
+			    </div>
+			</div>
 		</div>
 	</div>
 

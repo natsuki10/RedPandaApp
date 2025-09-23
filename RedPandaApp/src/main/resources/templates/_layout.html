@@ -8,11 +8,12 @@
   <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 
-<!-- ここを丸ごと呼び出す -->
 <body class="bg-light" th:fragment="shell(content)">
   <nav class="navbar navbar-expand-lg bg-white shadow-sm mb-3">
     <div class="container">
-      <a class="navbar-brand" th:href="@{/redpandas}">西山公園レッサーパンダ図鑑</a>
+		<a class="navbar-brand d-flex align-items-center" th:href="@{/redpandas}">
+		  <img src="/logo/logo.png" alt="西山公園レッサーパンダ図鑑" style="height:40px;" class="me-2">
+		</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#rpnav">
         <span class="navbar-toggler-icon"></span>
       </button>

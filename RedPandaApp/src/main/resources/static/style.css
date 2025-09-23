@@ -26,3 +26,19 @@
   position: relative;
   opacity: 1;
 }
+
+/* レスポンシブ*/
+@media (max-width: 576px) {
+  .panda-detail {
+    max-height: 240px;
+    object-fit: cover;
+  }
+  h1, h2, h3 {
+    font-size: 1.2rem;
+  }
+  .btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+  }
+}
+

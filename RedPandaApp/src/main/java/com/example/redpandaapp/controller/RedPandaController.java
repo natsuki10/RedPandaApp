@@ -196,9 +196,6 @@ public class RedPandaController {
 
             } catch (Exception ignore) {}
         }
-        //デバック用
-        System.out.println("LOOKUP " + name + " -> key=" + normalizeName(name));
-        System.out.println("SERVLET children=" + servletContext.getResourcePaths("/pandas/"));
 
         return urls;
     }
