@@ -2,7 +2,6 @@
 
 .card, .btn, .form-control, .form-select, .table { border-radius: 1rem; }
 .navbar-brand { font-weight: 700; letter-spacing: .5px; }
-.rp-badge { background: #ffe4ec; color: #b85672; }
 
 /* 一覧カードのサムネ*/
 .panda-thumb{
@@ -26,7 +25,7 @@
   position: relative;
   opacity: 1;
 }
-
+  
 /* レスポンシブ*/
 @media (max-width: 576px) {
   .panda-detail {
