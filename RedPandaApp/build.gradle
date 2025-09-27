@@ -33,14 +33,15 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
-    // DB
-    runtimeOnly 'com.h2database:h2'    
-    //implementation 'org.postgresql:postgresql' 
-    runtimeOnly 'org.postgresql:postgresql:42.7.4'
+    // DB 
+    runtimeOnly 'org.postgresql:postgresql'
     
     // （ローカル用H2）
     testRuntimeOnly 'com.h2database:h2'
+    
+    // テスト用
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     // Apache POI
     implementation 'org.apache.poi:poi-ooxml:5.2.3'
