@@ -47,3 +47,7 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+tasks.named('processResources') {
+    exclude('static/pandas/**')
+}
