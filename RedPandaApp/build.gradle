@@ -35,7 +35,12 @@ dependencies {
 
     // DB
     runtimeOnly 'com.h2database:h2'    
-    implementation 'org.postgresql:postgresql' 
+    //implementation 'org.postgresql:postgresql' 
+    runtimeOnly 'org.postgresql:postgresql:42.7.4'
+    
+    // （ローカル用H2）
+    testRuntimeOnly 'com.h2database:h2'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
     // Apache POI
     implementation 'org.apache.poi:poi-ooxml:5.2.3'
