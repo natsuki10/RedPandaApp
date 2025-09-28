@@ -20,6 +20,18 @@
       .rp-meta { font-size: .85rem; }
     }
   </style>
+  
+  <script>
+    function rpThumbFallback(img) {
+      if (!img.dataset.tried1 && img.dataset.alt1) {
+        img.dataset.tried1 = "1";
+        img.src = img.dataset.alt1;       // 1段目: <名前>1.jpg を試す
+      } else {
+        img.onerror = null;
+        img.src = "/pandas/placeholder.jpg"; // 最終: プレースホルダ
+      }
+    }
+  </script>
 </head>
 
 <body th:replace="~{_layout :: shell(~{::content})}">
@@ -54,7 +66,11 @@
         <article class="card rp-card h-100 shadow-sm">
           <!-- 統一比率のサムネ（4:3） -->
           <div class="ratio ratio-4x3">
-            <img th:src="@{${c.thumbUrl}}" alt="写真" class="rp-thumb" loading="lazy">
+			<img th:src="${card.thumbUrl}"
+			     th:attr="data-alt1=@{'/pandas/' + ${card.panda.name} + '1.jpg'}"
+			     class="rp-thumb"
+			     alt="写真"
+			     onerror="rpThumbFallback(this)">
           </div>
           <div class="card-body">
             <h3 class="h6 card-title mb-1 rp-name">
@@ -82,7 +98,11 @@
       <div class="col" th:each="c : ${pastCards}">
         <article class="card rp-card h-100 shadow-sm">
           <div class="ratio ratio-4x3">
-            <img th:src="@{${c.thumbUrl}}" alt="写真" class="rp-thumb" loading="lazy">
+			<img th:src="${card.thumbUrl}"
+			     th:attr="data-alt1=@{'/pandas/' + ${card.panda.name} + '1.jpg'}"
+			     class="rp-thumb"
+			     alt="写真"
+			     onerror="rpThumbFallback(this)">
           </div>
           <div class="card-body">
             <h3 class="h6 card-title mb-1 rp-name">

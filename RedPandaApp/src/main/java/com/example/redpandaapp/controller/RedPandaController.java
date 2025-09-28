@@ -42,6 +42,7 @@ public class RedPandaController {
 
     @Value("${app.asset.base:https://storage.googleapis.com/redpandaapp-202509-assets}")
     private String assetBase;
+
     private static final String EXCEL_URL =
         "https://ckan.odp.jig.jp/dataset/d62824ca-8b19-4d8f-b81d-7f7cc114f25d/resource/ccc95c6d-e3d0-4dd6-99fb-163704f5ab33/download/-.xlsx";
 
@@ -158,28 +159,19 @@ public class RedPandaController {
         return (int)Math.ceil((double)total / size);
     }
 
-    // ===== 画像URLの生成（サーバ内の列挙に頼らず、GCSの存在をHEADで確認） =====
+    // ===== 一覧/詳細の画像候補列挙（GCS に HEAD で存在確認） =====
     private List<String> imageUrls(String name) {
         String key = normalizeName(name);
 
-        // 代表的なファイル名パターンを生成（拡張子違い・連番など）
         List<String> candidates = new ArrayList<>();
-        // 例: 「カイ」「kai」/ 連番「カイ1..20」など（必要に応じて拡張）
         String original = name;
         String asciiLike = key; // 正規化後（半角・小文字・記号除去）
 
-        // 拡張子候補
         String[] exts = new String[] { "jpg", "jpeg", "png" };
 
-        // そのまま
-        for (String ext : exts) {
-            candidates.add(original + "." + ext);
-        }
-        // 正規化名（ASCII っぽい）
-        for (String ext : exts) {
-            candidates.add(asciiLike + "." + ext);
-        }
-        // 連番 1..20（上限は適宜調整）
+        for (String ext : exts) candidates.add(original + "." + ext);
+        for (String ext : exts) candidates.add(asciiLike + "." + ext);
+
         for (int i=1; i<=20; i++) {
             for (String ext : exts) {
                 candidates.add(original + i + "." + ext);
@@ -187,21 +179,23 @@ public class RedPandaController {
             }
         }
 
-        // 実在チェック（GCS に HEAD）→ あったものだけ /pandas/{filename} として返す
         List<String> urls = new ArrayList<>();
         for (String fn : candidates) {
             if (existsOnGcs(fn)) {
-                urls.add("/pandas/" + fn); // 実体はリダイレクトで GCS に飛ぶ
+                urls.add("/pandas/" + fn); // 実体は 302 で GCS へ
             }
         }
-
-        // 重複除去
         return urls.stream().distinct().toList();
     }
 
+    // ===== サムネの決定ロジック（要件通り 2 候補だけを確認） =====
     private String firstImageUrl(String name) {
-        List<String> all = imageUrls(name);
-        return all.isEmpty() ? "/pandas/placeholder.jpg" : all.get(0);
+        // 1) <名前>.jpg
+        if (existsOnGcs(name + ".jpg"))  return "/pandas/" + name + ".jpg";
+        // 2) <名前>1.jpg
+        if (existsOnGcs(name + "1.jpg")) return "/pandas/" + name + "1.jpg";
+        // 3) どちらも無ければプレースホルダ
+        return "/pandas/placeholder.jpg";
     }
 
     // 名前の正規化（全角→半角/互換正規化・小文字化・空白/記号除去）
@@ -217,9 +211,8 @@ public class RedPandaController {
     // GCS に HEAD（公開オブジェクト前提）
     private boolean existsOnGcs(String filename) {
         try {
-            String enc = URLEncoder.encode(filename, StandardCharsets.UTF_8);
-            // path segment だけをエンコードしたいので、スペース等以外の %2F を戻す
-            enc = enc.replace("+", "%20"); // 空白は %20
+            String enc = URLEncoder.encode(filename, StandardCharsets.UTF_8)
+                                    .replace("+", "%20");
             URL url = new URL(assetBase + "/pandas/" + enc);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setInstanceFollowRedirects(true);
@@ -227,7 +220,7 @@ public class RedPandaController {
             con.setConnectTimeout(2000);
             con.setReadTimeout(2000);
             int code = con.getResponseCode();
-            return (code >= 200 && code < 400); // 200 or 3xx(署名URL/リダイレクト) を存在とみなす
+            return (code >= 200 && code < 400);
         } catch (Exception e) {
             return false;
         }

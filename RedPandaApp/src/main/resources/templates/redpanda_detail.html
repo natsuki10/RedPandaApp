@@ -39,11 +39,15 @@
 				     class="carousel slide mb-3"
 				     data-bs-ride="carousel"
 				     data-bs-interval="4000"
-				     th:with="many=${#lists.size(images) > 1}">
+				     th:with="
+				       thumb=${#lists.isEmpty(images) ? '/pandas/placeholder.jpg' : null},
+				       imgs=${#lists.isEmpty(images) ? {thumb} : images},
+				       many=${#lists.size(imgs) > 1}
+				     ">
 				
 				  <!-- インジケータ -->
 				  <div class="carousel-indicators" th:if="${many}">
-				    <button th:each="img,i : ${images}"
+				    <button th:each="img,i : ${imgs}"
 				            type="button"
 				            th:attr="
 				              data-bs-target='#pandaCarousel',
@@ -57,7 +61,7 @@
 				
 				  <!-- スライド本体 -->
 				  <div class="carousel-inner panda-carousel">
-				    <div th:each="img,i : ${images}"
+				    <div th:each="img,i : ${imgs}"
 				         class="carousel-item"
 				         th:classappend="${i.index==0} ? ' active'">
 				      <img th:src="@{${img}}"
@@ -79,7 +83,6 @@
 				    <span class="visually-hidden">次へ</span>
 				  </button>
 				</div>
-			</div>
 		
 		    <!-- 個体情報（全項目） -->
 			<div class="col-12 col-lg-7">
