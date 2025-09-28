@@ -165,14 +165,14 @@ public class RedPandaController {
 
         List<String> candidates = new ArrayList<>();
         String original = name;
-        String asciiLike = key; // 正規化後（半角・小文字・記号除去）
-
+        String asciiLike = key;
         String[] exts = new String[] { "jpg", "jpeg", "png" };
 
-        for (String ext : exts) candidates.add(original + "." + ext);
-        for (String ext : exts) candidates.add(asciiLike + "." + ext);
-
-        for (int i=1; i<=20; i++) {
+        for (String ext : exts) {
+            candidates.add(original + "." + ext);
+            candidates.add(asciiLike + "." + ext);
+        }
+        for (int i = 1; i <= 20; i++) {
             for (String ext : exts) {
                 candidates.add(original + i + "." + ext);
                 candidates.add(asciiLike + i + "." + ext);
@@ -182,20 +182,17 @@ public class RedPandaController {
         List<String> urls = new ArrayList<>();
         for (String fn : candidates) {
             if (existsOnGcs(fn)) {
-                urls.add("/pandas/" + fn); // 実体は 302 で GCS へ
+                // ← ここを /assets/pandas/ に
+                urls.add("/assets/pandas/" + fn);
             }
         }
         return urls.stream().distinct().toList();
     }
 
-    // ===== サムネの決定ロジック（要件通り 2 候補だけを確認） =====
     private String firstImageUrl(String name) {
-        // 1) <名前>.jpg
-        if (existsOnGcs(name + ".jpg"))  return "/pandas/" + name + ".jpg";
-        // 2) <名前>1.jpg
-        if (existsOnGcs(name + "1.jpg")) return "/pandas/" + name + "1.jpg";
-        // 3) どちらも無ければプレースホルダ
-        return "/pandas/placeholder.jpg";
+        List<String> all = imageUrls(name);
+        // ここは静的配信の /pandas/placeholder.jpg を使う
+        return all.isEmpty() ? "/pandas/placeholder.jpg" : all.get(0);
     }
 
     // 名前の正規化（全角→半角/互換正規化・小文字化・空白/記号除去）

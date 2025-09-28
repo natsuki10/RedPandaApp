@@ -1,4 +1,3 @@
-// src/main/java/com/example/redpandaapp/controller/PandasRedirectController.java
 package com.example.redpandaapp.controller;
 
 import java.net.URLEncoder;
@@ -12,12 +11,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 @Controller
 public class PandasRedirectController {
 
-	 @Value("${app.asset.base:https://storage.googleapis.com/redpandaapp-202509-assets}")
+    @Value("${app.asset.base:https://storage.googleapis.com/redpandaapp-202509-assets}")
     private String assetBase;
 
-    @GetMapping("/pandas/{filename:.+}")
+    // GCS へ飛ばすのは /assets/pandas/** だけ
+    @GetMapping("/assets/pandas/{filename:.+}")
     public String redirect(@PathVariable String filename) {
-        // パスセグメント用にエンコード（スペース→%20）
         String enc = URLEncoder.encode(filename, StandardCharsets.UTF_8).replace("+", "%20");
         String target = assetBase + "/pandas/" + enc;
         return "redirect:" + target;
