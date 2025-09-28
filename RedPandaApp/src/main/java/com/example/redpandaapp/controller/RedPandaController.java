@@ -40,9 +40,8 @@ public class RedPandaController {
         this.diaryRepo = diaryRepo;
     }
 
-    @Value("${app.asset-base}")
-    private String assetBase; // 例: https://storage.googleapis.com/redpandaapp-202509-assets
-
+    @Value("${app.asset.base:https://storage.googleapis.com/redpandaapp-202509-assets}")
+    private String assetBase;
     private static final String EXCEL_URL =
         "https://ckan.odp.jig.jp/dataset/d62824ca-8b19-4d8f-b81d-7f7cc114f25d/resource/ccc95c6d-e3d0-4dd6-99fb-163704f5ab33/download/-.xlsx";
 

@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 @Controller
 public class PandasRedirectController {
 
-    @Value("${app.asset-base}")
+	 @Value("${app.asset.base:https://storage.googleapis.com/redpandaapp-202509-assets}")
     private String assetBase;
 
     @GetMapping("/pandas/{filename:.+}")
